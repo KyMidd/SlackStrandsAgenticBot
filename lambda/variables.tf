@@ -26,7 +26,7 @@ variable "secret_name" {
 variable "model_id" {
   description = "Model ID for the Lambda function"
   type        = string
-  default     = "anthropic.claude-sonnet-4-20250514-v1"
+  default     = "us.anthropic.claude-sonnet-4-20250514-v1:0"
 }
 variable "bot_name" {
   description = "Name of the bot"

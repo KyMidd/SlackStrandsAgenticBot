@@ -17,7 +17,7 @@ slack_message_size_limit_words = 350  # Slack limit of characters in response is
 debug_enabled = os.environ.get("DEBUG_ENABLED", "False")
 
 # Specify model ID and inference settings
-model_id = os.environ.get("MODEL_ID", "anthropic.claude-sonnet-4-20250514-v1")
+model_id = os.environ.get("MODEL_ID", "us.anthropic.claude-sonnet-4-20250514-v1:0")
 temperature = 0.1
 top_k = 30
 
@@ -88,6 +88,6 @@ system_prompt = f"""Assistant is a helpful large language model named {bot_name}
 
 # MCP
 pagerduty_api_url = os.environ.get("PAGERDUTY_API_URL")
-enable_pagerduty_mcp = os.environ.get("ENABLE_PAGERDUTY_MCP", "False") == "True"
-enable_github_mcp = os.environ.get("ENABLE_GITHUB_MCP", "False") == "True"
-enable_atlassian_mcp = os.environ.get("ENABLE_ATLASSIAN_MCP", "False") == "True"
+enable_pagerduty_mcp = os.environ.get("ENABLE_PAGERDUTY_MCP", "false").lower() == "true"
+enable_github_mcp = os.environ.get("ENABLE_GITHUB_MCP", "false").lower() == "true"
+enable_atlassian_mcp = os.environ.get("ENABLE_ATLASSIAN_MCP", "false").lower() == "true"

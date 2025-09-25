@@ -475,7 +475,7 @@ def handle_message_event(
             print("🚀 State of conversation after context request:", conversation)
 
     # Initial message to user
-    initial_message = f"🚀 {bot_name} is connecting to platforms and analyzing your request.\n\n{bot_name} can be slow, since she's connecting to platforms and using tools. Please give her 1-2 minutes to respond.\n\nWhen {bot_name} has finished, Slack will alert you of a new message in this thread.\n\n:turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob::turtle_blob:"
+    initial_message = f"🚀 {bot_name} is connecting to platforms and analyzing your request.\n\n{bot_name} can be slow, since she's connecting to platforms and using tools. Please give her 1-2 minutes to respond.\n\nWhen {bot_name} has finished, Slack will alert you of a new message in this thread.\n\n:turtle::turtle::turtle::turtle::turtle::turtle::turtle::turtle::turtle::turtle:"
     message_ts = update_slack_response(
         say,
         client,
