@@ -1,0 +1,3 @@
+[submodule "lambda/pagerduty-mcp-server"]
+	path = lambda/pagerduty-mcp-server
+	url = git@github.com:PagerDuty/pagerduty-mcp-server.git

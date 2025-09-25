@@ -1,0 +1,11 @@
+requests
+boto3
+slack-bolt
+mcp
+jsonschema
+rpds-py
+pydantic
+httpx
+anyio
+starlette
+uvicorn

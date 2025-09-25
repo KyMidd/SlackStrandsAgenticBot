@@ -1,0 +1,16 @@
+# Core dependencies
+slack-bolt
+requests
+boto3
+
+# MCP and Strands dependencies
+mcp
+strands-agents
+strands-agents-tools
+
+# Additional dependencies that may be required
+pydantic
+pydantic-core
+rpds-py
+annotated-types
+typing-extensions
