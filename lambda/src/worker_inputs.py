@@ -7,7 +7,9 @@ from strands_tools import calculator, current_time, retrieve
 ###
 
 # Bot info
-bot_name = os.environ.get("BOT_NAME", "Vera")  # Name of the bot, used in system prompt and Slack messages
+bot_name = os.environ.get(
+    "BOT_NAME", "Vera"
+)  # Name of the bot, used in system prompt and Slack messages
 
 # Slack
 slack_buffer_token_size = 10  # Number of tokens to buffer before updating Slack
@@ -28,7 +30,9 @@ token_budget = 4096
 bot_secret_name = os.environ.get("SECRET_NAME")
 
 # Bedrock guardrail information
-enable_guardrails = True if os.environ.get("GUARDRAILS_ID", "") != "" else False # If any value passed to GUARDRAILS_ID, set True, else False
+enable_guardrails = (
+    True if os.environ.get("GUARDRAILS_ID", "") != "" else False
+)  # If any value passed to GUARDRAILS_ID, set True, else False
 guardrailIdentifier = os.environ.get("GUARDRAILS_ID", "")
 guardrailVersion = "DRAFT"
 guardrailTracing = "enabled"  # [enabled, enabled_full, disabled]
@@ -77,6 +81,19 @@ system_prompt = f"""Assistant is a helpful large language model named {bot_name}
     When users ask about documentation, check Confluence for relevant pages first.
     ## PagerDuty
     When users ask about incidents, outages, or on-call schedules, check PagerDuty first.
+    ## Azure
+    When users ask about Azure resources (VMs, storage accounts, resource groups, subscriptions, etc.), use the Azure MCP tools.
+    Azure MCP provides tools for querying Azure resources across subscriptions.
+    ## AWS
+    When users ask about AWS resources (EC2 instances, S3 buckets, EKS clusters, RDS databases, Lambda functions, etc.), use the AWS CLI MCP tools.
+    The AWS CLI MCP supports multi-account access using the --profile flag.
+    ### AWS Account Directory
+    Assistant has access to the following AWS accounts:
+    - *Development* (dev): 123456789012 - Used for development and testing
+    - *Staging* (staging): 234567890123 - Pre-production environment
+    - *Production* (prod): 345678901234 - Production workloads
+    When a user asks about resources in a specific account, use the appropriate profile name with the --profile flag in AWS CLI commands.
+    Example: "aws eks list-clusters --region us-east-1 --profile prod"
 
     # References
     The assistant should include links to any Github resource or other external tool utilized to create an answer. It's preferrable to make a resource names a hyperlink to the real resource, for example GitHub Repo names hyperlinks to the Github Repo URL.
@@ -91,3 +108,5 @@ pagerduty_api_url = os.environ.get("PAGERDUTY_API_URL")
 enable_pagerduty_mcp = os.environ.get("ENABLE_PAGERDUTY_MCP", "false").lower() == "true"
 enable_github_mcp = os.environ.get("ENABLE_GITHUB_MCP", "false").lower() == "true"
 enable_atlassian_mcp = os.environ.get("ENABLE_ATLASSIAN_MCP", "false").lower() == "true"
+enable_azure_mcp = os.environ.get("ENABLE_AZURE_MCP", "false").lower() == "true"
+enable_aws_cli_mcp = os.environ.get("ENABLE_AWS_CLI_MCP", "false").lower() == "true"

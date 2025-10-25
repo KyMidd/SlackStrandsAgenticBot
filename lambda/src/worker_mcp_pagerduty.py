@@ -41,7 +41,9 @@ def build_pagerduty_mcp_client(
 ):
 
     # Build PagerDuty MCP client
-    pagerduty_mcp_client = initial_pagerduty_mcp_client(pagerduty_api_key, pagerduty_api_url)
+    pagerduty_mcp_client = initial_pagerduty_mcp_client(
+        pagerduty_api_key, pagerduty_api_url
+    )
 
     # Enter to open and leave open
     pagerduty_client = pagerduty_mcp_client.__enter__()

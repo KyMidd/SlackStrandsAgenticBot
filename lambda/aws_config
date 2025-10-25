@@ -1,0 +1,21 @@
+# AWS CLI Config for Multi-Account Access
+# This file configures profiles for cross-account access to target AWS accounts
+# Replace the account IDs and role names with your actual values
+
+[profile dev]
+role_arn = arn:aws:iam::111111111111:role/read-only-role
+role_session_name = SlackStrandsBot
+region = us-east-1
+credential_source = Environment
+
+[profile staging]
+role_arn = arn:aws:iam::222222222222:role/read-only-role
+role_session_name = SlackStrandsBot
+region = us-east-1
+credential_source = Environment
+
+[profile prod]
+role_arn = arn:aws:iam::333333333333:role/read-only-role
+role_session_name = SlackStrandsBot
+region = us-east-1
+credential_source = Environment

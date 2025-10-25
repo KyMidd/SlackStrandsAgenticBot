@@ -1,6 +1,6 @@
 # Slack Strands Agentic Bot
 
-A Slack bot powered by AWS Bedrock and the Strands agentic framework, with MCP (Model Context Protocol) integrations for PagerDuty, GitHub, and Atlassian services.
+A Slack bot powered by AWS Bedrock and the Strands agentic framework, with MCP (Model Context Protocol) integrations for PagerDuty, GitHub, Atlassian, Azure, and AWS services.
 
 ## Overview
 
@@ -12,6 +12,8 @@ This project deploys a Slack bot that can:
   - PagerDuty for incident management
   - GitHub for repository interactions
   - Atlassian for Jira/Confluence integration
+  - Azure for cloud resource queries
+  - AWS CLI for multi-account AWS resource queries
 - Run as containerized AWS Lambda functions with ARM64 architecture
 
 ## Architecture
@@ -22,7 +24,9 @@ The system consists of two AWS Lambda functions:
 
 ## Prerequisites
 
-Before deploying, you must create an AWS Secrets Manager secret containing your Slack bot credentials. The secret should include:
+Before deploying, you must create an AWS Secrets Manager secret containing your Slack bot credentials and any MCP integration credentials. The secret should include:
+
+### Required for all deployments:
 ```json
 {
   "slack_bot_token": "xoxb-your-bot-token",
@@ -30,10 +34,60 @@ Before deploying, you must create an AWS Secrets Manager secret containing your 
 }
 ```
 
-Additional credentials may be required for MCP integrations:
-- PagerDuty: API token
-- GitHub: Personal access token
-- Atlassian: API credentials
+### Additional credentials for MCP integrations:
+
+**For PagerDuty MCP** (when `enable_pagerduty_mcp = true`):
+```json
+{
+  "PAGERDUTY_API_KEY": "your-pagerduty-api-token"
+}
+```
+
+**For GitHub MCP** (when `enable_github_mcp = true`):
+```json
+{
+  "GITHUB_TOKEN": "ghp_your-personal-access-token"
+}
+```
+*Note: GitHub token needs read access to repositories*
+
+**For Atlassian MCP** (when `enable_atlassian_mcp = true`):
+```json
+{
+  "ATLASSIAN_CLIENT_ID": "your-atlassian-client-id",
+  "ATLASSIAN_REFRESH_TOKEN": "your-atlassian-refresh-token"
+}
+```
+
+**For Azure MCP** (when `enable_azure_mcp = true`):
+```json
+{
+  "AZURE_TENANT_ID": "your-azure-tenant-id",
+  "AZURE_CLIENT_ID": "your-azure-client-id",
+  "AZURE_CLIENT_SECRET": "your-azure-client-secret"
+}
+```
+*Note: Azure MCP requires a service principal with appropriate permissions to query Azure resources*
+
+**For AWS CLI MCP** (when `enable_aws_cli_mcp = true`):
+- No secrets required - uses Lambda execution role IAM permissions
+- Requires IAM permissions to assume roles in target AWS accounts
+- Configure cross-account access via the `aws_config` file
+
+### Complete secret example with all integrations:
+```json
+{
+  "slack_bot_token": "xoxb-your-bot-token",
+  "slack_signing_secret": "your-signing-secret",
+  "PAGERDUTY_API_KEY": "your-pagerduty-api-token",
+  "GITHUB_TOKEN": "ghp_your-personal-access-token",
+  "ATLASSIAN_CLIENT_ID": "your-atlassian-client-id",
+  "ATLASSIAN_REFRESH_TOKEN": "your-atlassian-refresh-token",
+  "AZURE_TENANT_ID": "your-azure-tenant-id",
+  "AZURE_CLIENT_ID": "your-azure-client-id",
+  "AZURE_CLIENT_SECRET": "your-azure-client-secret"
+}
+```
 
 ## Configuration
 
@@ -48,7 +102,7 @@ All configuration is managed through the `terraform.tfvars` file. Here are the a
 - **`secret_name`** (required): Name of the AWS Secrets Manager secret containing Slack credentials
   - *Impact*: Must exist before deployment; grants Lambda access to this secret
 
-- **`model_id`** (default: "anthropic.claude-sonnet-4-20250514-v1"): Bedrock model to use
+- **`model_id`** (default: "us.anthropic.claude-sonnet-4-20250514-v1:0"): Bedrock model to use
   - *Impact*: Determines the AI model powering your bot responses
 
 - **`debug_enabled`** (default: ""): Enable debug logging in Lambda functions
@@ -68,18 +122,18 @@ All configuration is managed through the `terraform.tfvars` file. Here are the a
 
 - **`enable_pagerduty_mcp`** (default: false): Enable PagerDuty integration
   - *Impact*: When true, allows bot to interact with PagerDuty incidents
-  - *Requires*: PagerDuty API token in secrets
+  - *Requires*: `PAGERDUTY_API_KEY` (valid PagerDuty token) in secrets
 
 - **`pagerduty_api_url`** (default: "https://api.pagerduty.com"): PagerDuty API endpoint
   - *Impact*: Defines the PagerDuty API base URL for integration
 
 - **`enable_github_mcp`** (default: false): Enable GitHub integration
   - *Impact*: When true, allows bot to interact with GitHub repositories
-  - *Requires*: GitHub personal access token in secrets
+  - *Requires*: `GITHUB_TOKEN` (PAT with read access) in secrets
 
 - **`enable_atlassian_mcp`** (default: false): Enable Atlassian integration
   - *Impact*: When true, allows bot to interact with Jira/Confluence
-  - *Requires*: Atlassian API credentials in secrets
+  - *Requires*: `ATLASSIAN_CLIENT_ID` and `ATLASSIAN_REFRESH_TOKEN` in secrets
 
 ### Example Configuration
 
@@ -87,7 +141,7 @@ All configuration is managed through the `terraform.tfvars` file. Here are the a
 # Bot Configuration
 bot_name    = "VeraResearch"
 secret_name = "VeraResearchSecret"
-model_id    = "anthropic.claude-sonnet-4-20250514-v1"
+model_id    = "us.anthropic.claude-sonnet-4-20250514-v1:0"
 debug_enabled = "True"
 
 # AWS Bedrock Features (optional)
