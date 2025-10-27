@@ -135,6 +135,15 @@ All configuration is managed through the `terraform.tfvars` file. Here are the a
   - *Impact*: When true, allows bot to interact with Jira/Confluence
   - *Requires*: `ATLASSIAN_CLIENT_ID` and `ATLASSIAN_REFRESH_TOKEN` in secrets
 
+- **`enable_azure_mcp`** (default: false): Enable Azure integration
+  - *Impact*: When true, allows bot to query Azure resources (VMs, storage, subscriptions, etc.)
+  - *Requires*: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET` in secrets
+
+- **`enable_aws_cli_mcp`** (default: false): Enable AWS CLI integration
+  - *Impact*: When true, allows bot to query AWS resources across multiple accounts
+  - *Requires*: IAM permissions for the Lambda execution role to assume cross-account roles
+  - *Configuration*: Edit `lambda/aws_config` file to define target AWS accounts and roles
+
 ### Example Configuration
 
 ```hcl
@@ -153,6 +162,8 @@ pagerduty_api_url    = "https://api.pagerduty.com"
 enable_pagerduty_mcp = true
 enable_github_mcp    = false
 enable_atlassian_mcp = false
+enable_azure_mcp     = false
+enable_aws_cli_mcp   = false
 ```
 
 ## Deployment
@@ -203,7 +214,15 @@ The system creates minimal IAM roles with permissions for:
 
 ## MCP Server Integration
 
-The bot includes a containerized PagerDuty MCP server that allows structured interaction with PagerDuty services. Additional MCP servers can be added by modifying the Dockerfile and enabling the corresponding flags.
+The bot includes multiple MCP servers for interacting with external services:
+
+- **PagerDuty MCP**: Custom containerized server for incident management
+- **GitHub MCP**: Official GitHub MCP server for repository interactions
+- **Atlassian MCP**: Official Atlassian MCP server for Jira/Confluence integration
+- **Azure MCP**: Official Azure MCP server for querying Azure resources
+- **AWS CLI MCP**: AWS Labs MCP server for multi-account AWS resource queries
+
+Each MCP server can be enabled/disabled independently via environment variables. The AWS CLI MCP supports cross-account access using profile-based role assumption - configure target accounts in the `lambda/aws_config` file.
 
 ## Troubleshooting
 
