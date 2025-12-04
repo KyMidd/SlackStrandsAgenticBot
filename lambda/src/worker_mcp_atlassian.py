@@ -3,13 +3,8 @@ import requests
 from mcp.client.sse import sse_client
 from strands.tools.mcp.mcp_client import MCPClient
 
-read_only_tools_permitted_prefixes = (
-    "fetch",
-    "get",
-    "lookup",
-    "search",
-    "atlassianUserInfo",
-)
+TOOLS_PREFIX = "atlassian"
+READ_ONLY_PREFIXES = ["fetch", "get", "lookup", "search", "atlassianUserInfo"]
 
 
 def get_access_token(refresh_token, client_id):
@@ -30,45 +25,35 @@ def get_access_token(refresh_token, client_id):
     return response.json()["access_token"]
 
 
-def initial_atlassian_mcp_client(refresh_token, client_id):
-    """Create initial Atlassian MCP client with OAuth2 authentication"""
+def build_atlassian_mcp_client(
+    refresh_token, client_id, build_atlassian_mcp_client="read_only"
+):
+    """Build Atlassian MCP client."""
+
+    # Get fresh access token
     access_token = get_access_token(refresh_token, client_id)
 
-    return MCPClient(
+    # Define tool filters for read-only mode
+    tool_filters = None
+    if build_atlassian_mcp_client == "read_only":
+        # Filters are applied AFTER prefix, so add prefix + separator to each read-only prefix
+        prefixed_read_only = tuple(
+            f"{TOOLS_PREFIX}_{tool_prefix}" for tool_prefix in READ_ONLY_PREFIXES
+        )
+        tool_filters = {
+            "allowed": [lambda tool: tool.tool_name.startswith(prefixed_read_only)]
+        }
+
+    # Create Atlassian MCP client
+    atlassian_mcp_client = MCPClient(
         lambda: sse_client(
             "https://mcp.atlassian.com/v1/sse",
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=300.0,
         ),
         startup_timeout=60,
+        tool_filters=tool_filters,
+        prefix=TOOLS_PREFIX,
     )
 
-
-def build_atlassian_mcp_client(
-    refresh_token, client_id, build_atlassian_mcp_client="read_only"
-):
-    """Build Atlassian MCP client"""
-
-    # Build Atlassian MCP client
-    atlassian_mcp_client = initial_atlassian_mcp_client(refresh_token, client_id)
-
-    # Enter to open and leave open
-    atlassian_client = atlassian_mcp_client.__enter__()
-
-    # Get tools from Atlassian client
-    all_atlassian_tools = atlassian_client.list_tools_sync()
-
-    # If read-only tools requested, only include those tools
-    if build_atlassian_mcp_client == "read_only":
-
-        filtered_tools = []
-        for tool in all_atlassian_tools:
-            tool_name = tool.tool_spec["name"]
-            if tool_name.startswith(read_only_tools_permitted_prefixes):
-                filtered_tools.append(tool)
-
-        return atlassian_mcp_client, filtered_tools
-
-    # If filtered list of MCP tools is not required, return client and all tools
-    else:
-        return atlassian_mcp_client, all_atlassian_tools
+    return atlassian_mcp_client
